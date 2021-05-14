@@ -1,0 +1,53 @@
+name: camus
+base: core20
+version: '0.3.1'
+summary: Peer-to-peer group video chat using WebRTC.
+description: |
+  Camus is a group video chat server that uses WebRTC for direct peer-to-peer
+  communication. Users can create public or private rooms, stream audio and
+  video, share their desktops, and send text messages.
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+  - build-on: armhf
+  - build-on: ppc64el
+  - build-on: s390x
+
+apps:
+  # Camus server daemon
+  camus:
+    command: bin/camus-wrapper
+    daemon: simple
+    restart-condition: always
+    plugs:
+      - network-bind
+      - network
+
+  # SQLite client
+  sqlite-client:
+    command: bin/sqlite-client
+
+hooks:
+  configure:
+    plugs: [network, network-bind]
+
+parts:
+  camus:
+    plugin: python
+    source: .
+    python-packages:
+      - litecli
+
+  utilities:
+    plugin: dump
+    source: snap/local/utilities/
+
+  bin:
+    plugin: dump
+    source: snap/local/bin/
+    organize:
+      '*': bin/
